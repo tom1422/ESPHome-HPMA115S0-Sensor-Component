@@ -17,3 +17,4 @@ Integration for the HPMA115S0 Dust and Particlee Sensor into ESPHome
       icon: "mdi:fan"
     update_interval: 5s
 ```
+Please report issues/improvements in the issues tab thank you.
