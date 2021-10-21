@@ -2,7 +2,7 @@
 Integration for the HPMA115S0 Dust and Particlee Sensor into ESPHome
 
 ## How to install
-1. Download this repo
+1. Download this repo through main branch or the releases page.
 2. Extract the "custom_components" folder and place it in your esphome directory (where your .yaml files are works for me)
 3. Add the sensor configuration to your ESPHome Project:
 ```
