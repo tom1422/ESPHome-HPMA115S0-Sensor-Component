@@ -29,5 +29,5 @@ uart:
 ## Issues
 Please report issues/improvements in the issues tab along with any debug info you find. Thank you.
 
-##Releases
+## Releases
 To see version history, click here.
