@@ -5,6 +5,12 @@
 #include "esphome/core/component.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/uart/uart.h"
+
+#include <string>
+#include <sstream>
+
+//https://github.com/tom1422/ESPHome-HPMA115S0-Sensor-Component -- VERSION 2
+
 //TX 9
 //RX 10
 //HardwareSerial hpmaSerial(9600, SERIAL_8N1, 10, 9);
@@ -25,7 +31,7 @@ namespace esphome {
       void update() override;
       float get_setup_priority() const override;
 
-      int comAvailableRead(int availableMustBeLowerThan);
+	  int comWait(bool start, int minDataToRead);
 
       bool read_values(float *p25, float *p10);
       bool stop_measurement();
