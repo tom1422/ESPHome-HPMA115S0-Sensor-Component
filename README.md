@@ -4,7 +4,7 @@ Integration for the HPMA115S0 Dust and Particlee Sensor into ESPHome
 ## How to install
 1. Download this repo
 2. Extract the "custom_components" folder and place it in your esphome directory (where your .yaml files are works for me)
-3. Add this to your ESPHome Project and you should be done:
+3. Add the sensor configuration to your ESPHome Project:
 ```
   - platform: hpma115s0_esphome
     pm_2_5:
@@ -17,4 +17,17 @@ Integration for the HPMA115S0 Dust and Particlee Sensor into ESPHome
       icon: "mdi:fan"
     update_interval: 5s
 ```
-Please report issues/improvements in the issues tab thank you.
+4. Next add the uart configuration near the top of your ESPHome Project file:
+```
+uart:
+  id: uart_bus
+  tx_pin: 9 #Change tx_pin and rx_pin to the ones you're using
+  rx_pin: 10
+  baud_rate: 9600
+```
+
+## Issues
+Please report issues/improvements in the issues tab along with any debug info you find. Thank you.
+
+##Releases
+To see version history, click here.
