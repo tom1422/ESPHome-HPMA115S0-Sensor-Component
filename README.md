@@ -30,4 +30,4 @@ uart:
 Please report issues/improvements in the issues tab along with any debug info you find. Thank you.
 
 ## Releases
-To see version history, click here.
+To see version history, [click here](https://github.com/tom1422/ESPHome-HPMA115S0-Sensor-Component/releases).
