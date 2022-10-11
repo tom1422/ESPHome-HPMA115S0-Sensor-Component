@@ -82,7 +82,7 @@ bool HPMA115S0Component::read_values(float *p25, float *p10) {
       if ((HEAD == 0x40) && (LEN == 0x05)) {
         // The header is valid, process rest of the data     
         // Verify checksum
-        if (((0x10000 - HEAD - LEN - COMD - DF1 - DF2 - DF3 - DF4) % 0XFF) == CS){
+        if (((0x10000 - HEAD - LEN - COMD - DF1 - DF2 - DF3 - DF4) % 0x100) == CS){
           // Checksum OK, we compute PM2.5 and PM10 values
           *p25 = DF1 * 256 + DF2;
           *p10 = DF3 * 256 + DF4;
