@@ -32,8 +32,7 @@ class HPMA115S0Component : public PollingComponent, public uart::UARTDevice {
   bool launchSuccess = false;
   long waitLast = 0; //Do not change
   long waitTime = 300; //Change to how long you want the module to wait before giving up COM in ms (Default 300)
-  std::string debugString = "";
-  std::string configString = "";
+  char debugString[250];
   int setup_SAS = 0; //1-Success, 2-Timeout, 3-NACK, 4-Malformed
   int setup_SM = 0; //1-Success, 2-Timeout, 3-NACK, 4-Malformed
   int setupTries = 0;

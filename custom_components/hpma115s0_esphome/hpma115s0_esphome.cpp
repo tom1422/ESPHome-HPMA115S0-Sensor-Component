@@ -25,11 +25,9 @@ void HPMA115S0Component::setup() {
 
 void HPMA115S0Component::dump_config() {
   if (launchSuccess) {
-    configString = "Sensor found after " + to_string(setupTries) + " tries. Will read and log values.";
-    ESP_LOGCONFIG(TAG, configString.c_str());
+    ESP_LOGCONFIG(TAG, "Sensor found after %i tries. Will read and log values.", setupTries);
   } else {
-    configString = "Error! HPMA115S0 Particle Sensor not found! Failed with: " + to_string(setup_SAS)  + " AND " + to_string(setup_SM) + ".";
-    ESP_LOGE(TAG, configString.c_str());
+    ESP_LOGE(TAG, "Error! HPMA115S0 Particle Sensor not found! Failed with: %i AND %i.", setup_SAS, setup_SM);
   }
 }
 
@@ -41,8 +39,7 @@ void HPMA115S0Component::update() {
       this->pm_2_5_sensor_->publish_state(p25);
       this->pm_10_0_sensor_->publish_state(p10);
     } else {
-      char toSend[200] = "Read Values Failed - See Previous Message - Debug info: ";
-      ESP_LOGE(TAG, strcat(toSend, debugString.c_str()));
+      ESP_LOGE(TAG, "Read Values Failed - See Previous Message");
     }
   } else {
     ESP_LOGI(TAG, "Not Updating. HPMA115S0 sensor was not found.");
@@ -93,22 +90,22 @@ bool HPMA115S0Component::read_values(float *p25, float *p10) {
         } else {
           //Checksum Fail
           ESP_LOGE(TAG, "Checksum Mismatch - Check debug data if this happens again");
-          debugString = "HEAD: " + to_string((int)HEAD) + " LEN: " + to_string((int)LEN) + " COMD: " + to_string((int)COMD) + " DF1: " + to_string((int)DF1) + " DF2: " + to_string((int)DF2) + " DF3: " + to_string((int)DF3) + " DF4: " + to_string((int)DF4) + " CS: " + to_string((int)CS);
+          ESP_LOGE(TAG, "HEAD %i LEN %i COMD %i DF1 %i DF2 %i DF3 %i DF4 %i CS %i", HEAD, LEN, COMD, DF1, DF2, DF3, DF4, CS);
           return false;
         }
       } else {
         ESP_LOGE(TAG, "Invalid Header - Check debug data if this happens again");
-        debugString = "HEAD: " + to_string((int)HEAD) + " LEN: " + to_string((int)LEN) + " COMD: " + to_string((int)COMD) + " DF1: " + to_string((int)DF1) + " DF2: " + to_string((int)DF2) + " DF3: " + to_string((int)DF3) + " DF4: " + to_string((int)DF4) + " CS: " + to_string((int)CS);
+        ESP_LOGE(TAG, "HEAD %i LEN %i COMD %i DF1 %i DF2 %i DF3 %i DF4 %i CS %i", HEAD, LEN, COMD, DF1, DF2, DF3, DF4, CS);
         return false;
       }
     } else {  
       ESP_LOGE(TAG, "Most likely NACK as only 2 bytes recieved - Check debug data if this happens again");
-      debugString = "HEAD: " + to_string((int)HEAD) + " LEN: " + to_string((int)LEN);
+      ESP_LOGE(TAG, "HEAD %i LEN %i", HEAD, LEN);
       return false;
     }
   } else {
     ESP_LOGE(TAG, "Read Values Failed - Serial Timeout to sensor");
-    debugString = "Available: " + to_string(this->available());
+    ESP_LOGD(TAG, "Available: %i" + this->available());
     return false;
   }
 }
