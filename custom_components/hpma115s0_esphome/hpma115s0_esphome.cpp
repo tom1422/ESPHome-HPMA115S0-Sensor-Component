@@ -105,7 +105,7 @@ bool HPMA115S0Component::read_values(float *p25, float *p10) {
     }
   } else {
     ESP_LOGE(TAG, "Read Values Failed - Serial Timeout to sensor");
-    ESP_LOGD(TAG, "Available: %i" + this->available());
+    ESP_LOGD(TAG, "Available: %i", this->available());
     return false;
   }
 }
