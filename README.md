@@ -1,5 +1,5 @@
 # ESPHome-HPMA115S0-Sensor-Component
-Integration for the HPMA115S0 Dust and Particlee Sensor into ESPHome
+Integration for the HPMA115S0 Dust and Particle Sensor into ESPHome
 
 ## How to install
 1. Download this repo through main branch or the releases page.
