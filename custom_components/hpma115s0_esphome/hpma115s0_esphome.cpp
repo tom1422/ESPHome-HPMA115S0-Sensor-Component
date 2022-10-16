@@ -38,6 +38,8 @@ void HPMA115S0Component::update() {
     if (read_values(&p25, &p10, &p4, &p1)) {
       this->pm_2_5_sensor_->publish_state(p25);
       this->pm_10_0_sensor_->publish_state(p10);
+      if(aqi_2_5_sensor_) (*aqi_2_5_sensor_).publish_state(calcAQI2_5());
+      if(aqi_10_0_sensor_) (*aqi_10_0_sensor_).publish_state(calcAQI10());
       if(pm_4_0_sensor_) (*pm_4_0_sensor_).publish_state(p4);
       if(pm_1_0_sensor_) (*pm_1_0_sensor_).publish_state(p1);
     } else {
@@ -235,5 +237,33 @@ bool HPMA115S0Component::enable_autosend(void)  { //Not used
   } else return false;
 }
 
-}  // namespace hm3301
+// equation from
+// https://www.airnow.gov/sites/default/files/2020-05/aqi-technical-assistance-document-sept2018.pdf
+float HPMA115S0Component::calcAQI2_5() const
+{
+    if (p25 <   0.0) { return -1.0; }
+    if (p25 <  12.0) { return (p25) / 12.0 * 50.0; }
+    if (p25 <  35.4) { return (p25 -  12.0) * 50.0 / ( 35.4 - 12.0) +  50.0; }
+    if (p25 <  55.4) { return (p25 -  35.4) * 50.0 / ( 55.4 - 35.4) + 100.0; }
+    if (p25 < 150.4) { return (p25 -  55.4) * 50.0 / (150.4 - 55.4) + 150.0; }
+    if (p25 < 250.4) { return (p25 - 150.4) + 200.0; }
+    if (p25 < 350.4) { return (p25 - 250.4) + 300.0; }
+    return (p25 - 350.4) + 400.0;
+}
+
+// equation from
+// https://www.airnow.gov/sites/default/files/2020-05/aqi-technical-assistance-document-sept2018.pdf
+float HPMA115S0Component::calcAQI10() const
+{
+    if (p10 < 0.0)   { return -1.0; }
+    if (p10 < 54.0)  { return (p10) / 54.0 * 50.0; }
+    if (p10 < 154.0) { return (p10 -  54.0) *  50.0 / (154.0 - 54.0) + 50.0; }
+    if (p10 < 254.0) { return (p10 - 154.0) *  50.0 / (254.0 - 154.0) + 100.0; }
+    if (p10 < 354.0) { return (p10 - 254.0) *  50.0 / (354.0 - 254.0) + 150.0; }
+    if (p10 < 424.0) { return (p10 - 354.0) * 100.0 / (424.0 - 354.0) + 200.0; }
+    if (p10 < 504.0) { return (p10 - 424.0) * 100.0 / (504.0 - 424.0) + 300.0; }
+    return (p10 - 504.0) + 400.0;
+}
+
+}  // namespace hpma115S0_esphome
 }  // namespace esphome

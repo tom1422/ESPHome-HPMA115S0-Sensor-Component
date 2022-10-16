@@ -7,6 +7,7 @@ from esphome.const import (
     CONF_PM_10_0,
     CONF_PM_1_0, #new
     CONF_PM_4_0, #new
+    DEVICE_CLASS_AQI, #new
     DEVICE_CLASS_PM1, #new
     DEVICE_CLASS_PM10,
     DEVICE_CLASS_PM25,
@@ -22,6 +23,10 @@ hpma115s0_ns = cg.esphome_ns.namespace("hpma115S0_esphome") #OLD: hm3301_ns = cg
 HPMA115S0Component = hpma115s0_ns.class_(
     "HPMA115S0Component", uart.UARTDevice, cg.PollingComponent
 )
+
+CONF_AQI_2_5 = "aqi_2_5"
+CONF_AQI_10_0 = "aqi_10_0"
+UNIT_INDEX = "index"
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
@@ -39,6 +44,20 @@ CONFIG_SCHEMA = cv.All(
                 icon=ICON_CHEMICAL_WEAPON,
                 accuracy_decimals=0,
                 device_class=DEVICE_CLASS_PM10,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_AQI_2_5): sensor.sensor_schema(
+                unit_of_measurement=UNIT_INDEX,
+                icon=ICON_CHEMICAL_WEAPON,
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_AQI,
+                state_class=STATE_CLASS_MEASUREMENT,
+            ),
+            cv.Optional(CONF_AQI_10_0): sensor.sensor_schema(
+                unit_of_measurement=UNIT_INDEX,
+                icon=ICON_CHEMICAL_WEAPON,
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_AQI,
                 state_class=STATE_CLASS_MEASUREMENT,
             ),
             cv.Optional(CONF_PM_1_0): sensor.sensor_schema(
@@ -75,6 +94,14 @@ async def to_code(config):
     if CONF_PM_10_0 in config:
         sens = await sensor.new_sensor(config[CONF_PM_10_0])
         cg.add(var.set_pm_10_0_sensor(sens))
+
+    if CONF_AQI_2_5 in config:
+        sens = await sensor.new_sensor(config[CONF_AQI_2_5])
+        cg.add(var.set_aqi_2_5_sensor(sens))
+
+    if CONF_AQI_10_0 in config:
+        sens = await sensor.new_sensor(config[CONF_AQI_10_0])
+        cg.add(var.set_aqi_10_0_sensor(sens))
 
     if CONF_PM_4_0 in config:
         sens = await sensor.new_sensor(config[CONF_PM_4_0])
