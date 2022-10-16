@@ -35,9 +35,11 @@ float HPMA115S0Component::get_setup_priority() const { return setup_priority::LA
 
 void HPMA115S0Component::update() {
   if (launchSuccess) {
-    if (read_values(&p25, &p10)) {
+    if (read_values(&p25, &p10, &p4, &p1)) {
       this->pm_2_5_sensor_->publish_state(p25);
       this->pm_10_0_sensor_->publish_state(p10);
+      if(pm_4_0_sensor_) (*pm_4_0_sensor_).publish_state(p4);
+      if(pm_1_0_sensor_) (*pm_1_0_sensor_).publish_state(p1);
     } else {
       ESP_LOGE(TAG, "Read Values Failed - See Previous Message");
     }
@@ -67,7 +69,7 @@ byte calculateChecksum(byte HEAD, byte LEN, byte* messageBuffer) {
   return (0x10000 - HEAD - LEN - sum) % 0x100;
 }
 
-bool HPMA115S0Component::read_values(float *p25, float *p10) {
+bool HPMA115S0Component::read_values(float *p25, float *p10, float *p4, float *p1) {
   while(this->available() >= 1){
     char getData = this->read();
   }
@@ -76,7 +78,7 @@ bool HPMA115S0Component::read_values(float *p25, float *p10) {
   this->write_array(read_particle, sizeof(read_particle));
 
   for(comWait(true, 2); comWait(false, 2) == 3;); //Wait for 2 pieces of data to be recieved
-  if (not this->available() >= 2) { //2 or more pieces of data have been recieved
+  if (not (this->available() >= 2)) { //2 or more pieces of data have been recieved
     ESP_LOGE(TAG, "Read Values Failed - Serial Timeout to sensor");
     ESP_LOGD(TAG, "Available: %i", this->available());
     return false;
@@ -91,7 +93,7 @@ bool HPMA115S0Component::read_values(float *p25, float *p10) {
   }
 
   for(comWait(true, LEN+1); comWait(false, LEN+1) == 3;); //Wait for other data to be recieved
-  if (not this->available() >= LEN+1) { // HEAD + LEN + CHECKSUM or more pieces of data have been recieved in total
+  if (not (this->available() >= LEN+1)) { // HEAD + LEN + CHECKSUM or more pieces of data have been recieved in total
     ESP_LOGE(TAG, "Most likely NACK as only 2 bytes recieved - Check debug data if this happens again");
     ESP_LOGE(TAG, "HEAD %i LEN %i", HEAD, LEN);
     return false;
@@ -118,6 +120,8 @@ bool HPMA115S0Component::read_values(float *p25, float *p10) {
   } else {
     *p25 = messageBuffer[3] * 256 + messageBuffer[4];
     *p10 = messageBuffer[7] * 256 + messageBuffer[8];
+    *p4 = messageBuffer[5] * 256 + messageBuffer[6];
+    *p1 = messageBuffer[1] * 256 + messageBuffer[2];
   }
   return true;
 }
