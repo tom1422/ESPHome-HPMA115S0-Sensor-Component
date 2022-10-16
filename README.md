@@ -8,14 +8,15 @@ Integration for the HPMA115S0 Dust and Particle Sensor into ESPHome
 ```
   - platform: hpma115s0_esphome
     pm_2_5:
-      name: "Particulate Matter <2.5µm Concentration"
-      unit_of_measurement: "<2.5µm"
-      icon:  "mdi:fan"
+      name: "Particulate Matter 2.5"
     pm_10_0:
-      name: "Particulate Matter <10.0µm Concentration"
-      unit_of_measurement: "<10.0µm"
-      icon: "mdi:fan"
-    update_interval: 5s
+      name: "Particulate Matter 10.0"
+    #Uncomment below if you have the compact sensor
+    #pm_1_0:
+    #  name: "Particulate Matter 1.0"
+    #pm_4_0:
+    #  name: "Particulate Matter 4.0"
+    update_interval: 10s
 ```
 4. Next add the uart configuration near the top of your ESPHome Project file:
 ```
