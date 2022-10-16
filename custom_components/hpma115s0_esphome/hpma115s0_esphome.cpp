@@ -59,6 +59,14 @@ int HPMA115S0Component::comWait(bool start, int minDataToRead) { //3 - Keep Wait
   return 3;
 }
 
+byte calculateChecksum(byte HEAD, byte LEN, byte* messageBuffer) {
+  int sum = 0;
+  for ( int index = 0; index < LEN; index++) {
+    sum += messageBuffer[index];
+  }
+  return (0x10000 - HEAD - LEN - sum) % 0x100;
+}
+
 bool HPMA115S0Component::read_values(float *p25, float *p10) {
   while(this->available() >= 1){
     char getData = this->read();
@@ -68,46 +76,50 @@ bool HPMA115S0Component::read_values(float *p25, float *p10) {
   this->write_array(read_particle, sizeof(read_particle));
 
   for(comWait(true, 2); comWait(false, 2) == 3;); //Wait for 2 pieces of data to be recieved
-  if (this->available() >= 2) { //2 or more pieces of data have been recieved
-    byte HEAD = this->read();
-    byte LEN = this->read();
-    for(comWait(true, 6); comWait(false, 6) == 3;); //Wait for other 6 to be recieved
-    if (this->available() >= 6) { //8 or more pieces of data have been recieved in total
-      byte COMD = this->read();
-      byte DF1 = this->read();
-      byte DF2 = this->read();
-      byte DF3 = this->read();
-      byte DF4 = this->read();
-      byte CS = this->read();
-      if ((HEAD == 0x40) && (LEN == 0x05)) {
-        // The header is valid, process rest of the data     
-        // Verify checksum
-        if (((0x10000 - HEAD - LEN - COMD - DF1 - DF2 - DF3 - DF4) % 0x100) == CS){
-          // Checksum OK, we compute PM2.5 and PM10 values
-          *p25 = DF1 * 256 + DF2;
-          *p10 = DF3 * 256 + DF4;
-          return true;
-        } else {
-          //Checksum Fail
-          ESP_LOGE(TAG, "Checksum Mismatch - Check debug data if this happens again");
-          ESP_LOGE(TAG, "HEAD %i LEN %i COMD %i DF1 %i DF2 %i DF3 %i DF4 %i CS %i", HEAD, LEN, COMD, DF1, DF2, DF3, DF4, CS);
-          return false;
-        }
-      } else {
-        ESP_LOGE(TAG, "Invalid Header - Check debug data if this happens again");
-        ESP_LOGE(TAG, "HEAD %i LEN %i COMD %i DF1 %i DF2 %i DF3 %i DF4 %i CS %i", HEAD, LEN, COMD, DF1, DF2, DF3, DF4, CS);
-        return false;
-      }
-    } else {  
-      ESP_LOGE(TAG, "Most likely NACK as only 2 bytes recieved - Check debug data if this happens again");
-      ESP_LOGE(TAG, "HEAD %i LEN %i", HEAD, LEN);
-      return false;
-    }
-  } else {
+  if (not this->available() >= 2) { //2 or more pieces of data have been recieved
     ESP_LOGE(TAG, "Read Values Failed - Serial Timeout to sensor");
     ESP_LOGD(TAG, "Available: %i", this->available());
     return false;
   }
+
+  byte HEAD = this->read();
+  byte LEN = this->read();
+  if (HEAD != 0x40 or (LEN != 0x05 and LEN !=0x0D)) {
+    ESP_LOGE(TAG, "Invalid Header - Check debug data if this happens again");
+    ESP_LOGE(TAG, "HEAD %i LEN %i", HEAD, LEN);
+    return false;
+  }
+
+  for(comWait(true, LEN+1); comWait(false, LEN+1) == 3;); //Wait for other data to be recieved
+  if (not this->available() >= LEN+1) { // HEAD + LEN + CHECKSUM or more pieces of data have been recieved in total
+    ESP_LOGE(TAG, "Most likely NACK as only 2 bytes recieved - Check debug data if this happens again");
+    ESP_LOGE(TAG, "HEAD %i LEN %i", HEAD, LEN);
+    return false;
+  }
+
+  // Read the message, including the command
+  byte messageBuffer[LEN];
+  if (not this->read_array(messageBuffer, LEN)) {
+    ESP_LOGE(TAG, "Read Values Failed - Serial Buffer Error");
+    return false;
+  }
+
+  // Read the checksum
+  byte CS = this->read();
+  if (CS != calculateChecksum(HEAD, LEN, messageBuffer)) {
+    ESP_LOGE(TAG, "Checksum Mismatch - Check debug data if this happens again");
+    return false;
+  }
+
+  // At this point, messageBuffer has either 5 or 0x0D (13) pieces in it.
+  if (LEN == 0x05) {
+    *p25 = messageBuffer[1] * 256 + messageBuffer[2];
+    *p10 = messageBuffer[3] * 256 + messageBuffer[4];
+  } else {
+    *p25 = messageBuffer[3] * 256 + messageBuffer[4];
+    *p10 = messageBuffer[7] * 256 + messageBuffer[8];
+  }
+  return true;
 }
 
 bool HPMA115S0Component::start_measurement(void) {
