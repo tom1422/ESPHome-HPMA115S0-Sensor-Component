@@ -11,6 +11,11 @@ Integration for the HPMA115S0 Dust and Particle Sensor into ESPHome
       name: "Particulate Matter 2.5"
     pm_10_0:
       name: "Particulate Matter 10.0"
+    # These aqi lines are optional
+    aqi_2_5:
+      name: "Air Quality Index Particulate Matter 2.5"
+    aqi_10_0:
+      name: "Air Quality Index Particulate Matter 10.0"
     #Uncomment below if you have the compact sensor
     #pm_1_0:
     #  name: "Particulate Matter 1.0"

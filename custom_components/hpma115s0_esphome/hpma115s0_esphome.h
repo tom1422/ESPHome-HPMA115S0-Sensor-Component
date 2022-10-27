@@ -16,6 +16,9 @@ class HPMA115S0Component : public PollingComponent, public uart::UARTDevice {
   void set_pm_2_5_sensor(sensor::Sensor *pm_2_5_sensor) { pm_2_5_sensor_ = pm_2_5_sensor; }
   void set_pm_10_0_sensor(sensor::Sensor *pm_10_0_sensor) { pm_10_0_sensor_ = pm_10_0_sensor; }
 
+  void set_aqi_2_5_sensor(sensor::Sensor *aqi_2_5_sensor) { aqi_2_5_sensor_ = aqi_2_5_sensor; }
+  void set_aqi_10_0_sensor(sensor::Sensor *aqi_10_0_sensor) { aqi_10_0_sensor_ = aqi_10_0_sensor; }
+
   void set_pm_4_0_sensor(sensor::Sensor *pm_4_0_sensor) { pm_4_0_sensor_ = pm_4_0_sensor; }
   void set_pm_1_0_sensor(sensor::Sensor *pm_1_0_sensor) { pm_1_0_sensor_ = pm_1_0_sensor; }
 
@@ -29,6 +32,9 @@ class HPMA115S0Component : public PollingComponent, public uart::UARTDevice {
   sensor::Sensor *pm_2_5_sensor_{nullptr};
   sensor::Sensor *pm_10_0_sensor_{nullptr};
 
+  sensor::Sensor *aqi_2_5_sensor_{nullptr};
+  sensor::Sensor *aqi_10_0_sensor_{nullptr};
+
   sensor::Sensor *pm_4_0_sensor_{nullptr};
   sensor::Sensor *pm_1_0_sensor_{nullptr};
 
@@ -36,6 +42,8 @@ class HPMA115S0Component : public PollingComponent, public uart::UARTDevice {
   bool success;
   float p25 = 0;
   float p10 = 0;
+  float aqi25 = 0;
+  float aqi10 = 0;
   float p4 = 0;
   float p1 = 0;
 
@@ -58,6 +66,8 @@ class HPMA115S0Component : public PollingComponent, public uart::UARTDevice {
   bool stop_measurement(void);
   bool stop_autosend(void);
   bool enable_autosend(void);
+  float calcAQI2_5() const;
+  float calcAQI10() const;
 };
 
 }  // namespace hpma115S0_esphome
